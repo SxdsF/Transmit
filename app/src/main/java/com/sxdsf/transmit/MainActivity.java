@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 intent.setClass(MainActivity.this, Main2Activity.class);
                 MainActivity.this.startActivity(intent);
-                Transmit.getInstance().passToNext("test", "测试");
+                Transmit.getInstance().post(Main2Activity.class, "测试");
             }
         });
         this.observable = Transmit.getInstance().<Event<String>>register("fuck");

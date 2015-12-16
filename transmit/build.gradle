@@ -1,5 +1,29 @@
 apply plugin: 'com.android.library'
 
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'transmit'
+
+    publishedGroupId = 'com.sxdsf'
+    libraryName = 'Transmit'
+    artifact = 'transmit'
+
+    libraryDescription = 'A message transmit library base on rxjava for Android.'
+
+    siteUrl = 'https://github.com/SxdsF/Transmit'
+    gitUrl = 'https://github.com/SxdsF/Transmit.git'
+
+    libraryVersion = '1.0.0'
+
+    developerId = 'SxdsF'
+    developerName = 'Bowen Sun'
+    developerEmail = 'ncu_sunbowen@163.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
+
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
@@ -25,3 +49,4 @@ dependencies {
     compile 'io.reactivex:rxjava:1.1.0'
     compile 'io.reactivex:rxandroid:1.1.0'
 }
+

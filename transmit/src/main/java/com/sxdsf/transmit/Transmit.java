@@ -34,7 +34,7 @@ public class Transmit {
 
     private final Map<Object, Object> subjectMapper = new ConcurrentHashMap<>();
 
-    public <T> T get(@NonNull Object tag, Class<T> cls) {
+    public <T> T receive(@NonNull Object tag, Class<T> cls) {
         T subject = null;
         Object content;
         synchronized (this.subjectMapper) {
@@ -47,7 +47,7 @@ public class Transmit {
         return subject;
     }
 
-    public <T> void passToNext(@NonNull Object tag, @NonNull T content) {
+    public <T> void post(@NonNull Object tag, @NonNull T content) {
         this.subjectMapper.put(tag, content);
     }
 
@@ -74,7 +74,7 @@ public class Transmit {
         }
     }
 
-    public <T> void post(@NonNull Object tag, @NonNull T content) {
+    public <T> void publish(@NonNull Object tag, @NonNull T content) {
         List<Subject> subjectList = this.subjectsMapper.get(tag);
         if (subjectList != null) {
             if (!subjectList.isEmpty()) {
