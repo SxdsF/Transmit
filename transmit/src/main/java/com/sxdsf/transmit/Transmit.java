@@ -1,4 +1,4 @@
-package com.sxdsf.transmit.core;
+package com.sxdsf.transmit;
 
 import android.support.annotation.NonNull;
 
