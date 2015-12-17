@@ -1,9 +1,13 @@
 package com.sxdsf.transmit.service.impl;
 
+import com.sxdsf.transmit.Destination;
 import com.sxdsf.transmit.Message;
 import com.sxdsf.transmit.Topic;
 import com.sxdsf.transmit.service.SyncTransmitService;
 import com.sxdsf.transmit.service.TransmitServiceMode;
+import com.sxdsf.transmit.service.filter.Filter;
+import com.sxdsf.transmit.service.producer.MessageProducer;
+import com.sxdsf.transmit.service.producer.impl.SyncMessageProducerImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,31 +16,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import rx.Observable;
 import rx.subjects.PublishSubject;
-import rx.subjects.Subject;
 
 /**
  * Created by sunbowen on 2015/12/17.
  */
 public class SyncTransmitServiceImpl implements SyncTransmitService {
 
-    private final Map<Topic, Message> subjectMapper = new ConcurrentHashMap<>();
-    private final Map<Topic, List<Subject>> subjectsMapper = new ConcurrentHashMap<>();
-
-    @Override
-    public <T> void syncPublish(Topic topic, Message<T> message) {
-        if (message != null) {
-            synchronized (this.subjectsMapper) {
-                List<Subject> subjectList = this.subjectsMapper.get(topic);
-                if (subjectList != null) {
-                    if (!subjectList.isEmpty()) {
-                        for (Subject subject : subjectList) {
-                            subject.onNext(message.getContent());
-                        }
-                    }
-                }
-            }
-        }
-    }
+    private final Map<String, Message> subjectMapper = new ConcurrentHashMap<>();
+    private final Map<String, List<ObserverTuple>> subjectsMapper = new ConcurrentHashMap<>();
 
     @Override
     public TransmitServiceMode getServiceMode() {
@@ -49,34 +36,77 @@ public class SyncTransmitServiceImpl implements SyncTransmitService {
     }
 
     @Override
-    public <T> void post(Topic topic, Message<T> message) {
-        this.subjectMapper.put(topic, message);
+    public <T> void post(Destination destination, Message<T> message) {
+        if (destination != null) {
+            this.subjectMapper.put(destination.getDestinationName(), message);
+        }
     }
 
     @Override
-    public <T> T receive(Topic topic) {
+    public <T> T receive(Destination destination) {
         T subject = null;
-        Message<T> content;
-        synchronized (this.subjectMapper) {
-            content = this.subjectMapper.get(topic);
-            this.subjectMapper.remove(topic);
-        }
-        if (content != null) {
-            subject = content.getContent();
+        if (destination != null) {
+            Message<T> content;
+            synchronized (this.subjectMapper) {
+                content = this.subjectMapper.get(destination.getDestinationName());
+                this.subjectMapper.remove(destination.getDestinationName());
+            }
+            if (content != null) {
+                subject = content.getContent();
+            }
         }
         return subject;
     }
 
     @Override
     public <T> Observable<T> register(Topic topic) {
-        Subject<T, T> subject = PublishSubject.create();
-        List<Subject> subjects;
-        synchronized (this.subjectsMapper) {
-            subjects = this.subjectsMapper.get(topic);
-            if (subjects == null) {
-                subjects = new ArrayList<>();
-                this.subjectsMapper.put(topic, subjects);
-                subjects.add(subject);
+        ObserverTuple<T, T> subject = null;
+        if (topic != null) {
+            subject = ObserverTuple.toObserverTuple(PublishSubject.create());
+            synchronized (this.subjectsMapper) {
+                List<ObserverTuple> tuples = this.subjectsMapper.get(topic.getTopicName());
+                if (tuples == null) {
+                    tuples = new ArrayList<>();
+                    this.subjectsMapper.put(topic.getTopicName(), tuples);
+                }
+                tuples.add(subject);
+            }
+        }
+        return subject;
+    }
+
+    @Override
+    public <T> Observable<T> register(Topic topic, Filter filter) {
+        ObserverTuple<T, T> subject = null;
+        if (topic != null) {
+            subject = ObserverTuple.toObserverTuple(PublishSubject.create());
+            synchronized (this.subjectsMapper) {
+                List<ObserverTuple> tuples = this.subjectsMapper.get(topic.getTopicName());
+                if (tuples == null) {
+                    tuples = new ArrayList<>();
+                    this.subjectsMapper.put(topic.getTopicName(), tuples);
+                }
+                subject.filters = new ArrayList<>();
+                subject.filters.add(filter);
+                tuples.add(subject);
+            }
+        }
+        return subject;
+    }
+
+    @Override
+    public <T> Observable<T> register(Topic topic, List<Filter> filterList) {
+        ObserverTuple<T, T> subject = null;
+        if (topic != null) {
+            subject = ObserverTuple.toObserverTuple(PublishSubject.create());
+            synchronized (this.subjectsMapper) {
+                List<ObserverTuple> tuples = this.subjectsMapper.get(topic.getTopicName());
+                if (tuples == null) {
+                    tuples = new ArrayList<>();
+                    this.subjectsMapper.put(topic.getTopicName(), tuples);
+                }
+                subject.filters = filterList;
+                tuples.add(subject);
             }
         }
         return subject;
@@ -84,14 +114,25 @@ public class SyncTransmitServiceImpl implements SyncTransmitService {
 
     @Override
     public <T> void unRegister(Topic topic, Observable<T> observable) {
-        synchronized (this.subjectsMapper) {
-            List<Subject> subjects = this.subjectsMapper.get(topic);
-            if (subjects != null) {
-                subjects.remove((Subject) observable);
-                if (subjects.isEmpty()) {
-                    this.subjectsMapper.remove(topic);
+        if (topic != null) {
+            synchronized (this.subjectsMapper) {
+                List<ObserverTuple> tuples = this.subjectsMapper.get(topic.getTopicName());
+                if (tuples != null) {
+                    tuples.remove((ObserverTuple) observable);
+                    if (tuples.isEmpty()) {
+                        this.subjectsMapper.remove(topic.getTopicName());
+                    }
                 }
             }
         }
+    }
+
+    @Override
+    public MessageProducer createSyncProducer(Topic topic) {
+        MessageProducer producer = null;
+        if (topic != null) {
+            producer = new SyncMessageProducerImpl(this.subjectsMapper.get(topic.getTopicName()));
+        }
+        return producer;
     }
 }

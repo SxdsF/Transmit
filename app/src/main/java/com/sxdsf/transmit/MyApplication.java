@@ -2,7 +2,7 @@ package com.sxdsf.transmit;
 
 import android.app.Application;
 
-import com.sxdsf.transmit.service.AsyncTransmitService;
+import com.sxdsf.transmit.service.SyncTransmitService;
 import com.sxdsf.transmit.service.TransmitServiceMode;
 
 /**
@@ -10,12 +10,12 @@ import com.sxdsf.transmit.service.TransmitServiceMode;
  */
 public class MyApplication extends Application {
 
-    public static AsyncTransmitService asyncTransmitService = null;
+    public static SyncTransmitService syncTransmitService = null;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        asyncTransmitService = Transmit.create(TransmitServiceMode.ASYNC);
-        asyncTransmitService.init();
+        syncTransmitService = Transmit.create(TransmitServiceMode.SYNC);
+        syncTransmitService.init();
     }
 }

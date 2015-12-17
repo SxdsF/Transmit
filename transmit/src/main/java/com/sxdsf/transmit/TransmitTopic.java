@@ -3,21 +3,12 @@ package com.sxdsf.transmit;
 /**
  * Created by sunbowen on 2015/12/17.
  */
-public class TransmitTopic implements Topic {
-
-    private String physicalName;
+public class TransmitTopic extends TransmitDestination implements Topic {
 
     public TransmitTopic(String physicalName) {
-        this.physicalName = physicalName;
+        super(physicalName);
     }
 
-    public String getPhysicalName() {
-        return physicalName;
-    }
-
-    public void setPhysicalName(String physicalName) {
-        this.physicalName = physicalName;
-    }
 
     @Override
     public String getTopicName() {

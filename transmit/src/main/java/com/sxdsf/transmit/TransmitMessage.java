@@ -1,16 +1,13 @@
-package com.sxdsf.transmit.service.impl;
-
-import com.sxdsf.transmit.Message;
-import com.sxdsf.transmit.Topic;
+package com.sxdsf.transmit;
 
 /**
  * Created by sunbowen on 2015/12/17.
  */
-class TransmitMessage<T> extends Message<T> {
+public class TransmitMessage<T> extends Message<T> {
 
     private Topic topic;
 
-    protected TransmitMessage(T content) {
+    public TransmitMessage(T content) {
         super(content);
     }
 

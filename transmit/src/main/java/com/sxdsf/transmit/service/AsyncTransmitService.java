@@ -1,12 +1,12 @@
 package com.sxdsf.transmit.service;
 
-import com.sxdsf.transmit.Message;
 import com.sxdsf.transmit.Topic;
+import com.sxdsf.transmit.service.producer.MessageProducer;
 
 /**
- * Created by sunbowen on 2015/12/17.
+ * Created by sunbowen on 2015/12/18.
  */
 public interface AsyncTransmitService extends TransmitService {
 
-    <T> void asyncPublish(Topic topic, Message<T> message);
+    MessageProducer createAsyncProducer(Topic topic);
 }
