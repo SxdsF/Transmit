@@ -13,7 +13,8 @@ import rx.functions.Action1;
 public class MainActivity extends AppCompatActivity {
 
     private TextView text;
-    private Observable<Event<String>> observable;
+    private Observable<String> observable;
+    public static final Topic topic = new TransmitTopic("MainActivity");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,23 +27,23 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 intent.setClass(MainActivity.this, Main2Activity.class);
                 MainActivity.this.startActivity(intent);
-                Transmit.getInstance().post(Main2Activity.class, "测试");
+                MyApplication.asyncTransmitService.post(Main2Activity.topic, Message.create("测试"));
             }
         });
-        this.observable = Transmit.getInstance().<Event<String>>register("fuck");
+        this.observable = MyApplication.asyncTransmitService.register(topic);
         this.observable.
-                subscribeOn(AndroidSchedulers.mainThread()).
-                subscribe(new Action1<Event<String>>() {
+                observeOn(AndroidSchedulers.mainThread()).
+                subscribe(new Action1<String>() {
                     @Override
-                    public void call(Event<String> s) {
-                        text.setText(s.content);
+                    public void call(String s) {
+                        text.setText(s);
                     }
                 });
     }
 
     @Override
     protected void onDestroy() {
-        Transmit.getInstance().unRegister("fuck", this.observable);
+        MyApplication.asyncTransmitService.unRegister(topic, this.observable);
         super.onDestroy();
     }
 }
