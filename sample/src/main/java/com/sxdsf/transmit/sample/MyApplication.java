@@ -1,7 +1,8 @@
-package com.sxdsf.transmit;
+package com.sxdsf.transmit.sample;
 
 import android.app.Application;
 
+import com.sxdsf.transmit.Transmit;
 import com.sxdsf.transmit.service.SyncTransmitService;
 import com.sxdsf.transmit.service.TransmitServiceMode;
 

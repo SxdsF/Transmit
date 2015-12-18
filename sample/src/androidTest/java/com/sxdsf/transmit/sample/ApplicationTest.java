@@ -1,4 +1,4 @@
-package com.sxdsf.transmit;
+package com.sxdsf.transmit.sample;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

@@ -1,10 +1,13 @@
-package com.sxdsf.transmit;
+package com.sxdsf.transmit.sample;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
+import com.sxdsf.transmit.Destination;
+import com.sxdsf.transmit.Message;
+import com.sxdsf.transmit.TransmitDestination;
 import com.sxdsf.transmit.service.producer.MessageProducer;
 
 public class Main2Activity extends AppCompatActivity {
@@ -17,10 +20,10 @@ public class Main2Activity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main2);
+        setContentView(com.sxdsf.transmit.R.layout.activity_main2);
         this.msg = MyApplication.syncTransmitService.receive(destination);
         this.producer = MyApplication.syncTransmitService.createSyncProducer(MainActivity.topic);
-        this.text = (TextView) this.findViewById(R.id.textView);
+        this.text = (TextView) this.findViewById(com.sxdsf.transmit.R.id.textView);
         this.text.setText(this.msg);
         this.text.setOnClickListener(new View.OnClickListener() {
             @Override

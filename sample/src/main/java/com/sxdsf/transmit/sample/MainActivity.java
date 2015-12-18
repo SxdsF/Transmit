@@ -1,4 +1,4 @@
-package com.sxdsf.transmit;
+package com.sxdsf.transmit.sample;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,6 +6,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
+import com.sxdsf.transmit.Message;
+import com.sxdsf.transmit.Topic;
+import com.sxdsf.transmit.TransmitTopic;
 import com.sxdsf.transmit.service.filter.impl.ClassFilter;
 
 import rx.Observable;
@@ -22,8 +25,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        this.text = (TextView) this.findViewById(R.id.text);
+        setContentView(com.sxdsf.transmit.R.layout.activity_main);
+        this.text = (TextView) this.findViewById(com.sxdsf.transmit.R.id.text);
         this.text.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

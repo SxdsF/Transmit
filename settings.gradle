@@ -1,1 +1,1 @@
-include ':app', ':transmit'
+include ':sample', ':transmit'
