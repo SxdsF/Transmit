@@ -26,7 +26,7 @@ public class Main2Activity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Main2Activity.this.finish();
-                producer.send(Message.create(new Object()));
+                producer.send(Message.create("测试"));
             }
         });
     }

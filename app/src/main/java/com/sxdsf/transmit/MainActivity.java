@@ -11,6 +11,7 @@ import com.sxdsf.transmit.service.filter.impl.ClassFilter;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
         });
         this.observable = MyApplication.syncTransmitService.register(topic, new ClassFilter(String.class));
         this.observable.
+                subscribeOn(Schedulers.io()).
                 observeOn(AndroidSchedulers.mainThread()).
                 subscribe(new Action1<String>() {
                     @Override
