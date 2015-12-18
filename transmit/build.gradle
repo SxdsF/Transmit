@@ -50,3 +50,13 @@ dependencies {
     compile 'io.reactivex:rxandroid:1.1.0'
 }
 
+task makeJar(type: Copy) {
+    delete '../library/transmit-1.0.0.jar'
+    from('build/intermediates/bundles/release/')
+    into('../library/')
+    include('classes.jar')
+    rename ('classes.jar', 'transmit-1.0.0.jar')
+}
+
+makeJar.dependsOn(build)
+

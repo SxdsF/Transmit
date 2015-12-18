@@ -1,5 +1,10 @@
 #Transmit
-Transmit是一个基于Rxjava的Android中的的消息总线。可以用来代替Activity中的Intent传值，以及类似于onActivityResult方法中的回传值，也可以用来像在两个Fragment之间传递数据。
+***==Transmit基于Rxjava,是一个Android中的消息总线。==***
+
+主要功能：
+1、代替Activity之间的Intent传值。
+2、代替Activity之间onActivityResult方法传值。
+3、用于Fragment之间传递数据。
 
 #Binaries
 ```
@@ -62,4 +67,5 @@ String msg = Transmit.getInstance().receive(BActivity.class,String.class);
   Transmit.getInstance().unRegister("test",o);
 ```
 
+#Download
 
