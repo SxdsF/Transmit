@@ -15,6 +15,7 @@ _ _ _
 - 代替Activity之间onActivityResult方法传值。
 - 用于Fragment之间传递数据。
 - 针对话题（Topic）的订阅与发布(Subscribe/Publish)。
+
 _ _ _
 
 #Usage
