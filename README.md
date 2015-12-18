@@ -1,6 +1,7 @@
 #Transmit
-***==Transmit基于Rxjava,是一个Android中的消息总线。==***
+***Transmit基于Rxjava,是一个Android中的消息总线。***
 _ _ _
+
 #Binaries
 ```
 compile 'com.sxdsf:transmit:1.0.0'
@@ -8,12 +9,14 @@ compile 'com.sxdsf:transmit:1.0.0'
 ```
 注:暂时不支持此方式，请在**Download**中下载
 _ _ _
+
 #Features
 - 代替Activity之间的Intent传值。
 - 代替Activity之间onActivityResult方法传值。
 - 用于Fragment之间传递数据。
 - 针对话题（Topic）的订阅与发布(Subscribe/Publish)。
 _ _ _
+
 #Usage
 ####相关概念
 在Transmit中有主动传递数据和订阅发布（Subscribe/Publish）两种服务，订阅发布还有同步（Sync）和异步（Async）两种方式。
@@ -32,7 +35,7 @@ public void onCreate() {
 ```
 通过在`Transmit`的`create()`方法中传入服务的模式创建一个服务实例。并且调用`init()`方法初始化。
 
-######1、主动传递数据
+######2、主动传递数据
 在Android中，一个Activity跳转到另一个Activity并传递数据，基本上是通过Intent，但是Intent只能传递比较简单和基本的类型的数据，像一些比较复杂的结构化的数据，用Intent没有办法传递，此时采用Transmit就比较简单，如下所示：
 
 在第一个Activity跳转到第二个Activity时，使用以下代码
@@ -46,11 +49,9 @@ syncTransmitService.post(Main2Activity.destination, Message.create("测试"));
 ```
 String msg = syncTransmitService.receive(Main2Activity.destination, String.class);
 ```
-`receive()`方法的返回值就是消息的实体。
+`receive()`方法的返回值就是消息的实体。接收的时候，服务会默认执行一个类型检查的过滤器，如果没通过过滤器会返回null。
 
-接收的时候，服务会默认执行一个类型检查的过滤器，如果没通过过滤器会返回null。
-
-######2、订阅和发布（Subscribe/Publish）
+######3、订阅和发布（Subscribe/Publish）
 我们可以通过以下代码来创建一个订阅者，表示它对某一个话题（Topic）感兴趣
 ```
 Observable<String> observable = syncTransmitService.register(new Topic("测试"),String.class);
