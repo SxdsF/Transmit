@@ -9,6 +9,7 @@ import com.sxdsf.transmit.TransmitMessage;
 import com.sxdsf.transmit.service.CompositeTransmitService;
 import com.sxdsf.transmit.service.TransmitServiceMode;
 import com.sxdsf.transmit.service.filter.Filter;
+import com.sxdsf.transmit.service.filter.impl.ClassFilter;
 import com.sxdsf.transmit.service.producer.MessageProducer;
 import com.sxdsf.transmit.service.producer.impl.AsyncMessageProducerImpl;
 import com.sxdsf.transmit.service.producer.impl.SyncMessageProducerImpl;
@@ -53,7 +54,7 @@ class InnerTransmitService implements CompositeTransmitService {
     }
 
     @Override
-    public <T> T receive(Destination destination) {
+    public <T> T receive(Destination destination, Class<T> cls) {
         T subject = null;
         if (destination != null) {
             Message<T> content;
@@ -62,19 +63,22 @@ class InnerTransmitService implements CompositeTransmitService {
                 this.subjectMapper.remove(destination.getDestinationName());
             }
             if (content != null) {
-                subject = content.getContent();
+                Filter filter = new ClassFilter(cls);
+                if (filter.filter(content)) {
+                    subject = content.getContent();
+                }
             }
         }
         return subject;
     }
 
     @Override
-    public <T> Observable<T> register(Topic topic) {
-        return this.register(topic, (Filter) null);
+    public <T> Observable<T> register(Topic topic, Class<T> cls) {
+        return this.register(topic, cls, new ClassFilter(cls));
     }
 
     @Override
-    public <T> Observable<T> register(Topic topic, Filter filter) {
+    public <T> Observable<T> register(Topic topic, Class<T> cls, Filter filter) {
         Subject<T, T> subject = null;
         if (topic != null) {
             subject = PublishSubject.create();
@@ -84,11 +88,10 @@ class InnerTransmitService implements CompositeTransmitService {
                     subjects = new ArrayList<>();
                     this.tuples.subjectsMapper.put(topic.getTopicName(), subjects);
                 }
-                if (filter != null) {
-                    List<Filter> filters = new ArrayList<>();
-                    filters.add(filter);
-                    this.tuples.filtersMapper.put(subject, filters);
-                }
+                List<Filter> filters = new ArrayList<>();
+                filters.add(new ClassFilter(cls));
+                filters.add(filter);
+                this.tuples.filtersMapper.put(subject, filters);
                 subjects.add(subject);
             }
         }
@@ -96,7 +99,7 @@ class InnerTransmitService implements CompositeTransmitService {
     }
 
     @Override
-    public <T> Observable<T> register(Topic topic, List<Filter> filterList) {
+    public <T> Observable<T> register(Topic topic, Class<T> cls, List<Filter> filterList) {
         Subject<T, T> subject = null;
         if (topic != null) {
             subject = PublishSubject.create();
@@ -106,7 +109,10 @@ class InnerTransmitService implements CompositeTransmitService {
                     subjects = new ArrayList<>();
                     this.tuples.subjectsMapper.put(topic.getTopicName(), subjects);
                 }
-                this.tuples.filtersMapper.put(subject, filterList);
+                List<Filter> filters = new ArrayList<>();
+                filters.add(new ClassFilter(cls));
+                filters.addAll(filterList);
+                this.tuples.filtersMapper.put(subject, filters);
                 subjects.add(subject);
             }
         }

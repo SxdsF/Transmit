@@ -19,13 +19,13 @@ public interface TransmitService {
 
     <T> void post(Destination destination, Message<T> message);
 
-    <T> T receive(Destination destination);
+    <T> T receive(Destination destination, Class<T> cls);
 
-    <T> Observable<T> register(Topic topic);
+    <T> Observable<T> register(Topic topic, Class<T> cls);
 
-    <T> Observable<T> register(Topic topic, Filter filter);
+    <T> Observable<T> register(Topic topic, Class<T> cls, Filter filter);
 
-    <T> Observable<T> register(Topic topic, List<Filter> filterList);
+    <T> Observable<T> register(Topic topic, Class<T> cls, List<Filter> filterList);
 
     <T> void unRegister(Topic topic, Observable<T> observable);
 }

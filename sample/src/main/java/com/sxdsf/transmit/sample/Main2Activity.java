@@ -20,16 +20,16 @@ public class Main2Activity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.sxdsf.transmit.R.layout.activity_main2);
-        this.msg = MyApplication.syncTransmitService.receive(destination);
+        setContentView(R.layout.activity_main2);
+        this.msg = MyApplication.syncTransmitService.receive(destination, String.class);
         this.producer = MyApplication.syncTransmitService.createSyncProducer(MainActivity.topic);
-        this.text = (TextView) this.findViewById(com.sxdsf.transmit.R.id.textView);
+        this.text = (TextView) this.findViewById(R.id.textView);
         this.text.setText(this.msg);
         this.text.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Main2Activity.this.finish();
-                producer.send(Message.create("测试"));
+                producer.send(Message.create(new Object()));
             }
         });
     }

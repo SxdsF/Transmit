@@ -9,7 +9,6 @@ import android.widget.TextView;
 import com.sxdsf.transmit.Message;
 import com.sxdsf.transmit.Topic;
 import com.sxdsf.transmit.TransmitTopic;
-import com.sxdsf.transmit.service.filter.impl.ClassFilter;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -19,14 +18,14 @@ import rx.schedulers.Schedulers;
 public class MainActivity extends AppCompatActivity {
 
     private TextView text;
-    private Observable<String> observable;
+    private Observable<Integer> observable;
     public static final Topic topic = new TransmitTopic("MainActivity");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.sxdsf.transmit.R.layout.activity_main);
-        this.text = (TextView) this.findViewById(com.sxdsf.transmit.R.id.text);
+        setContentView(com.sxdsf.transmit.sample.R.layout.activity_main);
+        this.text = (TextView) this.findViewById(com.sxdsf.transmit.sample.R.id.text);
         this.text.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -36,13 +35,13 @@ public class MainActivity extends AppCompatActivity {
                 MyApplication.syncTransmitService.post(Main2Activity.destination, Message.create("测试"));
             }
         });
-        this.observable = MyApplication.syncTransmitService.register(topic, new ClassFilter(String.class));
+        this.observable = MyApplication.syncTransmitService.register(topic, Integer.class);
         this.observable.
                 subscribeOn(Schedulers.io()).
                 observeOn(AndroidSchedulers.mainThread()).
-                subscribe(new Action1<String>() {
+                subscribe(new Action1<Integer>() {
                     @Override
-                    public void call(String s) {
+                    public void call(Integer s) {
                         text.setText(s);
                     }
                 });

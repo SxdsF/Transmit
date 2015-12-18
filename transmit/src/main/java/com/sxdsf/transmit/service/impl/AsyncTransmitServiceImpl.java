@@ -35,23 +35,23 @@ public class AsyncTransmitServiceImpl implements AsyncTransmitService {
     }
 
     @Override
-    public <T> T receive(Destination destination) {
-        return this.service.receive(destination);
+    public <T> T receive(Destination destination, Class<T> cls) {
+        return this.service.receive(destination, cls);
     }
 
     @Override
-    public <T> Observable<T> register(Topic topic) {
-        return this.service.register(topic);
+    public <T> Observable<T> register(Topic topic, Class<T> cls) {
+        return this.service.register(topic, cls);
     }
 
     @Override
-    public <T> Observable<T> register(Topic topic, Filter filter) {
-        return this.service.register(topic, filter);
+    public <T> Observable<T> register(Topic topic, Class<T> cls, Filter filter) {
+        return this.service.register(topic, cls, filter);
     }
 
     @Override
-    public <T> Observable<T> register(Topic topic, List<Filter> filterList) {
-        return this.service.register(topic, filterList);
+    public <T> Observable<T> register(Topic topic, Class<T> cls, List<Filter> filterList) {
+        return this.service.register(topic, cls, filterList);
     }
 
     @Override

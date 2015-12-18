@@ -7,7 +7,7 @@ public class Message<T> implements Comparable<Message> {
 
     private int messageId;
     private long timestamp;
-    private int priority;
+    private int priority = NORM_PRIORITY;
     private T content;
 
     public final static int MIN_PRIORITY = 1;
