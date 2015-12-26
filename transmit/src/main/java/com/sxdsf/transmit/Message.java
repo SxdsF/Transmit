@@ -1,5 +1,7 @@
 package com.sxdsf.transmit;
 
+import android.support.annotation.NonNull;
+
 /**
  * Created by sunbowen on 2015/12/17.
  */
@@ -9,6 +11,7 @@ public class Message<T> implements Comparable<Message> {
     private long timestamp;
     private int priority = NORM_PRIORITY;
     private T content;
+    private boolean isEmptyMessage;
 
     public final static int MIN_PRIORITY = 1;
     public final static int NORM_PRIORITY = 5;
@@ -50,6 +53,10 @@ public class Message<T> implements Comparable<Message> {
         this.content = content;
     }
 
+    public boolean isEmptyMessage() {
+        return isEmptyMessage;
+    }
+
     @Override
     public int compareTo(Message another) {
         int result = 0;
@@ -63,7 +70,13 @@ public class Message<T> implements Comparable<Message> {
         return result;
     }
 
-    public static <T> Message<T> create(T content) {
+    public static <T> Message<T> create(@NonNull T content) {
         return new Message<>(content);
+    }
+
+    public static Message createEmptyMessage() {
+        Message message = new Message(null);
+        message.isEmptyMessage = true;
+        return message;
     }
 }

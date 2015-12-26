@@ -17,7 +17,8 @@ import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView text;
+    @BindView(R.id.text)
+    TextView text;
     private Observable<Integer> observable;
     public static final Topic topic = new TransmitTopic("MainActivity");
 
@@ -25,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(com.sxdsf.transmit.sample.R.layout.activity_main);
-        this.text = (TextView) this.findViewById(com.sxdsf.transmit.sample.R.id.text);
+        Processor.autoBindView(this);
         this.text.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -1,5 +1,6 @@
 package com.sxdsf.transmit.service.producer.impl;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.sxdsf.transmit.Message;
@@ -25,15 +26,13 @@ public class AsyncMessageProducerImpl implements MessageProducer {
     private static final String TAG = "AsyncTransmitService";
 
     @Override
-    public <T> void send(Message<T> message) {
-        if (message != null) {
-            try {
-                TransmitMessage<T> tm = new TransmitMessage<>(message.getContent());
-                tm.setTopic(this.topic);
-                this.messageQueue.put(tm);
-            } catch (InterruptedException e) {
-                Log.e(TAG, e.getMessage());
-            }
+    public <T> void send(@NonNull Message<T> message) {
+        try {
+            TransmitMessage<T> tm = TransmitMessage.copyFromMessage(message);
+            tm.setTopic(this.topic);
+            this.messageQueue.put(tm);
+        } catch (InterruptedException e) {
+            Log.e(TAG, e.getMessage());
         }
     }
 }

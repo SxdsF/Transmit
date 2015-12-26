@@ -1,5 +1,7 @@
 package com.sxdsf.transmit.service;
 
+import android.support.annotation.NonNull;
+
 import com.sxdsf.transmit.Destination;
 import com.sxdsf.transmit.Message;
 import com.sxdsf.transmit.Topic;
@@ -15,17 +17,19 @@ import rx.Observable;
 public interface TransmitService {
     TransmitServiceMode getServiceMode();
 
-    void init();
+    void initialize();
 
-    <T> void post(Destination destination, Message<T> message);
+    boolean isInitialized();
 
-    <T> T receive(Destination destination, Class<T> cls);
+    <T> void post(@NonNull Destination destination, @NonNull Message<T> message);
 
-    <T> Observable<T> register(Topic topic, Class<T> cls);
+    <T> T receive(@NonNull Destination destination, @NonNull Class<T> cls);
 
-    <T> Observable<T> register(Topic topic, Class<T> cls, Filter filter);
+    <T> Observable<T> register(@NonNull Topic topic, @NonNull Class<T> cls);
 
-    <T> Observable<T> register(Topic topic, Class<T> cls, List<Filter> filterList);
+    <T> Observable<T> register(@NonNull Topic topic, @NonNull Class<T> cls, Filter filter);
 
-    <T> void unRegister(Topic topic, Observable<T> observable);
+    <T> Observable<T> register(@NonNull Topic topic, @NonNull Class<T> cls, List<Filter> filterList);
+
+    <T> void unRegister(@NonNull Topic topic, @NonNull Observable<T> observable);
 }

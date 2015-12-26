@@ -11,7 +11,7 @@ import rx.subjects.Subject;
 /**
  * Created by sunbowen on 2015/12/18.
  */
-public class ObserableTuple {
+public class ObservableTuple {
 
     public final Map<String, List<Subject>> subjectsMapper = new ConcurrentHashMap<>();
     public final Map<Subject, List<Filter>> filtersMapper = new ConcurrentHashMap<>();

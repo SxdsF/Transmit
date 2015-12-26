@@ -1,5 +1,6 @@
 package com.sxdsf.transmit.service.impl;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.sxdsf.transmit.Destination;
@@ -19,7 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import rx.Observable;
 import rx.subjects.PublishSubject;
@@ -30,9 +34,10 @@ import rx.subjects.Subject;
  */
 class InnerTransmitService implements CompositeTransmitService {
     private final Map<String, Message> subjectMapper = new ConcurrentHashMap<>();
-    private final ObserableTuple tuples = new ObserableTuple();
+    private final ObservableTuple tuple = new ObservableTuple();
     private final BlockingQueue<TransmitMessage> messageQueue = new PriorityBlockingQueue<>();
-    private final Thread pollingThread = new Thread(new Task());
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final AtomicBoolean isInit = new AtomicBoolean(false);
 
     private static final String TAG = "InnerTransmitService";
 
@@ -42,115 +47,103 @@ class InnerTransmitService implements CompositeTransmitService {
     }
 
     @Override
-    public void init() {
-        this.pollingThread.start();
-    }
-
-    @Override
-    public <T> void post(Destination destination, Message<T> message) {
-        if (destination != null) {
-            this.subjectMapper.put(destination.getDestinationName(), message);
+    public void initialize() {
+        if (this.isInit.compareAndSet(false, true)) {
+            this.executorService.execute(new Task());
         }
     }
 
     @Override
-    public <T> T receive(Destination destination, Class<T> cls) {
+    public boolean isInitialized() {
+        return this.isInit.get();
+    }
+
+    @Override
+    public <T> void post(@NonNull Destination destination, @NonNull Message<T> message) {
+        this.subjectMapper.put(destination.getDestinationName(), message);
+    }
+
+    @Override
+    public <T> T receive(@NonNull Destination destination, @NonNull Class<T> cls) {
         T subject = null;
-        if (destination != null) {
-            Message<T> content;
-            synchronized (this.subjectMapper) {
-                content = this.subjectMapper.get(destination.getDestinationName());
-                this.subjectMapper.remove(destination.getDestinationName());
-            }
-            if (content != null) {
-                Filter filter = new ClassFilter(cls);
-                if (filter.filter(content)) {
-                    subject = content.getContent();
-                }
+        Message<?> content;
+        synchronized (this.subjectMapper) {
+            content = this.subjectMapper.get(destination.getDestinationName());
+            this.subjectMapper.remove(destination.getDestinationName());
+        }
+        if (content != null && !content.isEmptyMessage()) {
+            Filter filter = new ClassFilter(cls);
+            if (filter.filter(content)) {
+                subject = cls.cast(content.getContent());
             }
         }
         return subject;
     }
 
     @Override
-    public <T> Observable<T> register(Topic topic, Class<T> cls) {
+    public <T> Observable<T> register(@NonNull Topic topic, @NonNull Class<T> cls) {
         return this.register(topic, cls, new ClassFilter(cls));
     }
 
     @Override
-    public <T> Observable<T> register(Topic topic, Class<T> cls, Filter filter) {
-        Subject<T, T> subject = null;
-        if (topic != null) {
-            subject = PublishSubject.create();
-            synchronized (this.tuples) {
-                List<Subject> subjects = this.tuples.subjectsMapper.get(topic.getTopicName());
-                if (subjects == null) {
-                    subjects = new ArrayList<>();
-                    this.tuples.subjectsMapper.put(topic.getTopicName(), subjects);
-                }
-                List<Filter> filters = new ArrayList<>();
-                filters.add(new ClassFilter(cls));
-                filters.add(filter);
-                this.tuples.filtersMapper.put(subject, filters);
-                subjects.add(subject);
+    public <T> Observable<T> register(@NonNull Topic topic, @NonNull Class<T> cls, Filter filter) {
+        Subject<T, T> subject = PublishSubject.create();
+        synchronized (this.tuple) {
+            List<Subject> subjects = this.tuple.subjectsMapper.get(topic.getTopicName());
+            if (subjects == null) {
+                subjects = new ArrayList<>();
+                this.tuple.subjectsMapper.put(topic.getTopicName(), subjects);
             }
+            List<Filter> filters = new ArrayList<>();
+            filters.add(new ClassFilter(cls));
+            filters.add(filter);
+            this.tuple.filtersMapper.put(subject, filters);
+            subjects.add(subject);
         }
         return subject;
     }
 
     @Override
-    public <T> Observable<T> register(Topic topic, Class<T> cls, List<Filter> filterList) {
-        Subject<T, T> subject = null;
-        if (topic != null) {
-            subject = PublishSubject.create();
-            synchronized (this.tuples) {
-                List<Subject> subjects = this.tuples.subjectsMapper.get(topic.getTopicName());
-                if (subjects == null) {
-                    subjects = new ArrayList<>();
-                    this.tuples.subjectsMapper.put(topic.getTopicName(), subjects);
-                }
-                List<Filter> filters = new ArrayList<>();
-                filters.add(new ClassFilter(cls));
-                filters.addAll(filterList);
-                this.tuples.filtersMapper.put(subject, filters);
-                subjects.add(subject);
+    public <T> Observable<T> register(@NonNull Topic topic, @NonNull Class<T> cls, List<Filter> filterList) {
+        Subject<T, T> subject = PublishSubject.create();
+        synchronized (this.tuple) {
+            List<Subject> subjects = this.tuple.subjectsMapper.get(topic.getTopicName());
+            if (subjects == null) {
+                subjects = new ArrayList<>();
+                this.tuple.subjectsMapper.put(topic.getTopicName(), subjects);
             }
+            List<Filter> filters = new ArrayList<>();
+            filters.add(new ClassFilter(cls));
+            filters.addAll(filterList);
+            this.tuple.filtersMapper.put(subject, filters);
+            subjects.add(subject);
         }
         return subject;
     }
 
     @Override
-    public <T> void unRegister(Topic topic, Observable<T> observable) {
-        if (topic != null) {
-            synchronized (this.tuples) {
-                List<Subject> subjects = this.tuples.subjectsMapper.get(topic.getTopicName());
-                if (subjects != null) {
-                    subjects.remove((Subject) observable);
-                    if (subjects.isEmpty()) {
-                        this.tuples.subjectsMapper.remove(topic.getTopicName());
-                    }
+    public <T> void unRegister(@NonNull Topic topic, @NonNull Observable<T> observable) {
+        synchronized (this.tuple) {
+            List<Subject> subjects = this.tuple.subjectsMapper.get(topic.getTopicName());
+            if (subjects != null) {
+                subjects.remove((Subject) observable);
+                if (subjects.isEmpty()) {
+                    this.tuple.subjectsMapper.remove(topic.getTopicName());
                 }
-                this.tuples.filtersMapper.remove((Subject) observable);
             }
+            this.tuple.filtersMapper.remove((Subject) observable);
         }
     }
 
+
     @Override
-    public MessageProducer createAsyncProducer(Topic topic) {
-        MessageProducer producer = null;
-        if (topic != null) {
-            producer = new AsyncMessageProducerImpl(topic, this.messageQueue);
-        }
-        return producer;
+    public MessageProducer createAsyncProducer(@NonNull Topic topic) {
+        return new AsyncMessageProducerImpl(topic, this.messageQueue);
     }
 
     @Override
-    public MessageProducer createSyncProducer(Topic topic) {
-        MessageProducer producer = null;
-        if (topic != null) {
-            producer = new SyncMessageProducerImpl(topic, this.tuples);
-        }
-        return producer;
+    public MessageProducer createSyncProducer(@NonNull Topic topic) {
+        return new SyncMessageProducerImpl(topic, this.tuple);
     }
 
 
@@ -161,17 +154,19 @@ class InnerTransmitService implements CompositeTransmitService {
                 TransmitMessage message = messageQueue.take();
                 if (message != null && message.getTopic() != null) {
                     Topic topic = message.getTopic();
-                    synchronized (tuples) {
-                        List<Subject> subjects = tuples.subjectsMapper.get(topic.getTopicName());
+                    synchronized (tuple) {
+                        List<Subject> subjects = tuple.subjectsMapper.get(topic.getTopicName());
                         if (subjects != null && !subjects.isEmpty()) {
                             for (Subject subject : subjects) {
                                 if (subject != null) {
-                                    List<Filter> filters = tuples.filtersMapper.get(subject);
+                                    List<Filter> filters = tuple.filtersMapper.get(subject);
                                     boolean flag = true;
-                                    if (filters != null) {
-                                        for (Filter filter : filters) {
-                                            if (filter != null) {
-                                                flag = filter.filter(message);
+                                    if (!message.isEmptyMessage()) {
+                                        if (filters != null) {
+                                            for (Filter filter : filters) {
+                                                if (filter != null) {
+                                                    flag = filter.filter(message);
+                                                }
                                             }
                                         }
                                     }

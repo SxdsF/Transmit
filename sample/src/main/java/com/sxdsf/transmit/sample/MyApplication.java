@@ -17,6 +17,6 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         syncTransmitService = Transmit.create(TransmitServiceMode.SYNC);
-        syncTransmitService.init();
+        syncTransmitService.initialize();
     }
 }

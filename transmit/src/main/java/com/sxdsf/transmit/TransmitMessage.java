@@ -1,5 +1,7 @@
 package com.sxdsf.transmit;
 
+import android.support.annotation.NonNull;
+
 /**
  * Created by sunbowen on 2015/12/17.
  */
@@ -17,5 +19,9 @@ public class TransmitMessage<T> extends Message<T> {
 
     public void setTopic(Topic topic) {
         this.topic = topic;
+    }
+
+    public static <T> TransmitMessage<T> copyFromMessage(@NonNull Message<T> message) {
+        return (TransmitMessage<T>) message;
     }
 }

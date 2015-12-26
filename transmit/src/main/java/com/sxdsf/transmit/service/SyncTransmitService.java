@@ -1,5 +1,7 @@
 package com.sxdsf.transmit.service;
 
+import android.support.annotation.NonNull;
+
 import com.sxdsf.transmit.Topic;
 import com.sxdsf.transmit.service.producer.MessageProducer;
 
@@ -8,6 +10,6 @@ import com.sxdsf.transmit.service.producer.MessageProducer;
  */
 public interface SyncTransmitService extends TransmitService {
 
-    MessageProducer createSyncProducer(Topic topic);
+    MessageProducer createSyncProducer(@NonNull Topic topic);
 
 }
