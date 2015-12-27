@@ -3,12 +3,11 @@ package com.sxdsf.transmit;
 /**
  * Created by sunbowen on 2015/12/17.
  */
-public class TransmitTopic extends TransmitDestination implements Topic {
+public class TransmitTopic extends TransmitDestination implements Topic, Comparable<TransmitTopic> {
 
     public TransmitTopic(String physicalName) {
         super(physicalName);
     }
-
 
     @Override
     public String getTopicName() {
@@ -21,13 +20,28 @@ public class TransmitTopic extends TransmitDestination implements Topic {
     }
 
     @Override
-    public boolean equals(Object o) {
-        boolean flag = false;
-        if (o != null) {
-            if (this.toString().equals(o.toString())) {
-                flag = true;
-            }
+    public boolean equals(Object object) {
+        if (object == null) {
+            return false;
         }
-        return flag;
+
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof TransmitTopic)) {
+            return false;
+        }
+
+        return this.getUuid().equals(((TransmitTopic) object).getUuid());
+    }
+
+    @Override
+    public int compareTo(TransmitTopic another) {
+        if (another == this) {
+            return 0;
+        }
+
+        return this.getUuid().compareTo(another.getUuid());
     }
 }

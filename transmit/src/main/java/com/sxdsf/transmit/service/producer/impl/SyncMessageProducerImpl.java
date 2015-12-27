@@ -10,6 +10,10 @@ import com.sxdsf.transmit.service.producer.MessageProducer;
 
 import java.util.List;
 
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.subjects.Subject;
 
 /**
@@ -18,38 +22,49 @@ import rx.subjects.Subject;
 public class SyncMessageProducerImpl implements MessageProducer {
 
     private final Topic topic;
-    private final ObservableTuple tuples;
+    private final ObservableTuple tuple;
 
-    public SyncMessageProducerImpl(Topic topic, ObservableTuple tuples) {
+    public SyncMessageProducerImpl(Topic topic, ObservableTuple tuple) {
         this.topic = topic;
-        this.tuples = tuples;
+        this.tuple = tuple;
     }
 
     @Override
-    public <T> void send(@NonNull Message<T> message) {
-        if (this.tuples != null) {
-            synchronized (this.tuples) {
-                List<Subject> subjects = this.tuples.subjectsMapper.get(this.topic.getTopicName());
-                if (subjects != null && !subjects.isEmpty()) {
-                    for (Subject subject : subjects) {
-                        if (subject != null) {
-                            List<Filter> filters = this.tuples.filtersMapper.get(subject);
-                            boolean flag = true;
-                            if (!message.isEmptyMessage()) {
-                                if (filters != null) {
-                                    for (Filter filter : filters) {
-                                        if (filter != null) {
-                                            flag = filter.filter(message);
+    public <T> void send(@NonNull final Message<T> message) {
+        if (this.tuple != null) {
+            synchronized (this.tuple) {
+                final List<Subject> subjects = this.tuple.subjectsMapper.get(this.topic.getUniqueId());
+                Observable.from(subjects).
+                        filter(new Func1<Subject, Boolean>() {
+                            @Override
+                            public Boolean call(Subject subject) {
+                                return subject != null;
+                            }
+                        }).
+                        filter(new Func1<Subject, Boolean>() {
+                            @Override
+                            public Boolean call(Subject subject) {
+                                boolean flag = true;
+                                List<Filter> filters = tuple.filtersMapper.get(subject);
+                                if (!message.isEmptyMessage()) {
+                                    if (filters != null) {
+                                        for (Filter filter : filters) {
+                                            if (filter != null) {
+                                                flag = filter.filter(message);
+                                            }
                                         }
                                     }
                                 }
+                                return flag;
                             }
-                            if (flag) {
+                        }).
+                        observeOn(AndroidSchedulers.mainThread()).
+                        subscribe(new Action1<Subject>() {
+                            @Override
+                            public void call(Subject subject) {
                                 subject.onNext(message.getContent());
                             }
-                        }
-                    }
-                }
+                        });
             }
         }
     }

@@ -19,6 +19,7 @@ public class Message<T> implements Comparable<Message> {
 
     protected Message(T content) {
         this.content = content;
+        this.timestamp = System.currentTimeMillis();
     }
 
     public int getMessageId() {

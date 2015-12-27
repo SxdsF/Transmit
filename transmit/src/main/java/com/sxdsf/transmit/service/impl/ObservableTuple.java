@@ -4,6 +4,7 @@ import com.sxdsf.transmit.service.filter.Filter;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import rx.subjects.Subject;
@@ -13,6 +14,6 @@ import rx.subjects.Subject;
  */
 public class ObservableTuple {
 
-    public final Map<String, List<Subject>> subjectsMapper = new ConcurrentHashMap<>();
+    public final Map<UUID, List<Subject>> subjectsMapper = new ConcurrentHashMap<>();
     public final Map<Subject, List<Filter>> filtersMapper = new ConcurrentHashMap<>();
 }
