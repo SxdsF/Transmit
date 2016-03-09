@@ -7,11 +7,30 @@ import android.support.annotation.NonNull;
  */
 public class Message<T> implements Comparable<Message> {
 
+    /**
+     * 消息id
+     */
     private int messageId;
+    /**
+     * 时间戳
+     */
     private long timestamp;
+    /**
+     * 优先级
+     */
     private int priority = NORM_PRIORITY;
+    /**
+     * 内容
+     */
     private T content;
+    /**
+     * 是否是空消息
+     */
     private boolean isEmptyMessage;
+    /**
+     * 是否被消费
+     */
+    private boolean isConsumed;
 
     public final static int MIN_PRIORITY = 1;
     public final static int NORM_PRIORITY = 5;
@@ -56,6 +75,14 @@ public class Message<T> implements Comparable<Message> {
 
     public boolean isEmptyMessage() {
         return isEmptyMessage;
+    }
+
+    public boolean isConsumed() {
+        return isConsumed;
+    }
+
+    public void setIsConsumed(boolean isConsumed) {
+        this.isConsumed = isConsumed;
     }
 
     @Override

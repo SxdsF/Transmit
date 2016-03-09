@@ -11,6 +11,7 @@ import com.sxdsf.transmit.service.CompositeTransmitService;
 import com.sxdsf.transmit.service.TransmitServiceMode;
 import com.sxdsf.transmit.service.filter.Filter;
 import com.sxdsf.transmit.service.filter.impl.ClassFilter;
+import com.sxdsf.transmit.service.filter.impl.IsConsumedFilter;
 import com.sxdsf.transmit.service.producer.MessageProducer;
 import com.sxdsf.transmit.service.producer.impl.AsyncMessageProducerImpl;
 import com.sxdsf.transmit.service.producer.impl.SyncMessageProducerImpl;
@@ -98,6 +99,7 @@ class InnerTransmitService implements CompositeTransmitService {
                 this.tuple.subjectsMapper.put(topic.getUniqueId(), subjects);
             }
             List<Filter> filters = new ArrayList<>();
+            filters.add(new IsConsumedFilter());
             filters.add(new ClassFilter(cls));
             filters.add(filter);
             this.tuple.filtersMapper.put(subject, filters);
@@ -116,6 +118,7 @@ class InnerTransmitService implements CompositeTransmitService {
                 this.tuple.subjectsMapper.put(topic.getUniqueId(), subjects);
             }
             List<Filter> filters = new ArrayList<>();
+            filters.add(new IsConsumedFilter());
             filters.add(new ClassFilter(cls));
             filters.addAll(filterList);
             this.tuple.filtersMapper.put(subject, filters);
