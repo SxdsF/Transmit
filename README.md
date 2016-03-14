@@ -1,13 +1,5 @@
-#Transmit
+﻿#Transmit
 ***Transmit基于Rxjava,是一个Android中的消息总线。***
-_ _ _
-
-#Binaries
-```
-compile 'com.sxdsf:transmit:1.0.0'
-
-```
-注:暂时不支持此方式，请在**Download**中下载
 _ _ _
 
 #Features
