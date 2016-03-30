@@ -31,6 +31,7 @@ import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.subjects.PublishSubject;
+import rx.subjects.SerializedSubject;
 import rx.subjects.Subject;
 
 /**
@@ -91,7 +92,7 @@ class InnerTransmitService implements CompositeTransmitService {
 
     @Override
     public <T> Observable<T> register(@NonNull Topic topic, @NonNull Class<T> cls, Filter filter) {
-        Subject<T, T> subject = PublishSubject.create();
+        Subject<T, T> subject = new SerializedSubject<>(PublishSubject.<T>create());
         synchronized (this.tuple) {
             List<Subject> subjects = this.tuple.subjectsMapper.get(topic.getUniqueId());
             if (subjects == null) {
@@ -110,7 +111,7 @@ class InnerTransmitService implements CompositeTransmitService {
 
     @Override
     public <T> Observable<T> register(@NonNull Topic topic, @NonNull Class<T> cls, List<Filter> filterList) {
-        Subject<T, T> subject = PublishSubject.create();
+        Subject<T, T> subject = new SerializedSubject<>(PublishSubject.<T>create());
         synchronized (this.tuple) {
             List<Subject> subjects = this.tuple.subjectsMapper.get(topic.getUniqueId());
             if (subjects == null) {
